@@ -7,7 +7,7 @@ public class Team {
     @JsonProperty("reference")
     private String name;
     private String url;
-    private boolean isJunior;
+    private int isJunior; // 1 if junior, 0 if not
     @JsonProperty("break_categories")
     private String[] breakCategories;
     private Speaker[] speakers;
@@ -39,7 +39,7 @@ public class Team {
     }
 
     public boolean isJunior() {
-        return isJunior;
+        return isJunior == 1;
     }   
 
     public String[] getBreakCategories() {
@@ -48,7 +48,7 @@ public class Team {
 
     public void setBreakCategories(String[] breakCategories) {
         this.breakCategories = breakCategories;
-        this.isJunior = breakCategories.length > 1;
+        this.isJunior = (breakCategories.length > 1) ? 1 : 0;
     }
 
     public Speaker[] getSpeakers() {

@@ -2,29 +2,22 @@ package com.kallie.breakcalculator;
 
 import java.util.*;
 
-public class BPSimulator {
+public class WSDCSimulator {
 
     static int teams, jrTeams;
     static int openBreak, jrBreak;
     static int roundsLeft;
     static int simulationRuns; // 100,000
 	
-	static int[][] permutations = {
-		{0, 1, 2, 3}, {0, 1, 3, 2}, {0, 2, 1, 3}, {0, 2, 3, 1}, {0, 3, 1, 2}, {0, 3, 2, 1}, //0-5
-		{1, 0, 2, 3}, {1, 0, 3, 2}, {1, 2, 0, 3}, {1, 2, 3, 0}, {1, 3, 0, 2}, {1, 3, 2, 0}, //6-11
-		{2, 0, 1, 3}, {2, 0, 3, 1}, {2, 1, 0, 3}, {2, 1, 3, 0}, {2, 3, 0, 1}, {2, 3, 1, 0}, //12-17
-		{3, 0, 1, 2}, {3, 0, 2, 1}, {3, 1, 0, 2}, {3, 1, 2, 0}, {3, 2, 0, 1}, {3, 2, 1, 0}  //18-23
-	};
+	static int[][] permutations = { {0, 1}, {1, 0}};
 
 	public static void beginSim(int teams, int openBreak, int roundsLeft, int simulationRuns, int[] startingPoints) {
-        BPSimulator.teams = teams;
-        BPSimulator.openBreak = openBreak;
-        BPSimulator.roundsLeft = roundsLeft;
-        BPSimulator.simulationRuns = simulationRuns;
+        WSDCSimulator.teams = teams;
+        WSDCSimulator.openBreak = openBreak;
+        WSDCSimulator.roundsLeft = roundsLeft;
+        WSDCSimulator.simulationRuns = simulationRuns;
 
-        sortDescending(startingPoints);
-
-        while (teams % 4 != 0) teams++; // assume that they will add swing teams
+        if (teams % 2 == 1) teams++; // assume that they will add swing teams
 
         int min = Integer.MAX_VALUE;
         int[] minFrac = new int[2];
@@ -35,7 +28,7 @@ public class BPSimulator {
         int[] maxArr = new int[teams];
 
         for (int i = 0; i < simulationRuns; i++) {
-            int[] sim = simTourney(Arrays.copyOf(startingPoints, teams));
+            int[] sim = simTourney(new int[teams]);
             int x = sim[teams - openBreak];
             int[] frac = findFraction(x, sim);
             
@@ -65,15 +58,21 @@ public class BPSimulator {
         //printArr(maxArr);
     }
 
+    public static void printArr(int[] arr) {
+        for (int i = teams - 1; i >= 0; i -= 2)
+            System.out.print(arr[i] + " " + arr[i + 1] + " ");
+        System.out.println();
+    }
+
     public static int[] simTourney(int[] sim) {
         for (int round = 0; round < roundsLeft; round++) {
-            for (int room = 0; room < teams; room += 4) {
-                int rand = (int) (Math.random() * 24);
+            for (int room = 0; room < teams; room += 2) {
+                int rand = (int) (Math.random() * 2);
 
-                for (int i = 0; i < 4; i++) {
-                    sim[room + i] += permutations[rand][i];
-                }
+                sim[room] += permutations[rand][0];
+                sim[room + 1] += permutations[rand][1];
             }
+
             Arrays.sort(sim);
         }
 
@@ -97,21 +96,5 @@ public class BPSimulator {
         }
 
         return new int[] {broke, total};
-    }
-
-    public static void sortDescending(int[] arr) {
-        Integer[] boxedArray = Arrays.stream(arr).boxed().toArray(Integer[]::new);
-        Arrays.sort(boxedArray, Collections.reverseOrder());
-
-        for (int i = 0; i < arr.length; i++)
-            arr[i] = boxedArray[i];
-    }
-
-    public static void printArr(int[] arr) {
-        for (int i = teams - 1; i >= 0; i--) {
-            System.out.print(arr[i] + " ");
-            if (i % 4 == 0) System.out.println();
-        }
-        System.out.println();
     }
 }

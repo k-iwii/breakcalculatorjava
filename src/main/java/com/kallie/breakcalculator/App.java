@@ -4,6 +4,9 @@ import java.util.Scanner;
 
 public class App 
 {
+    static final int simulationRuns = 100000;
+    static int totalRounds = 5;
+
     public static void main( String[] args )
     {
         Scanner sc = new Scanner(System.in);
@@ -19,7 +22,7 @@ public class App
             System.out.println(team.getName());
         });*/
 
-        BPSimulator.beginSim(calicotab.getTeams().size(), openBreak);
+        // BPSimulator.beginSim(calicotab.getTeams().size(), openBreak, totalRounds, simulationRuns);
     }
 }
 
