@@ -1,19 +1,29 @@
 package com.kallie.breakcalculator;
 
+import java.io.IOException;
 import org.junit.jupiter.api.Test;
 // import static org.junit.jupiter.api.Assertions.*;
 
 public class bpSimulatorTest {
     @Test
-    public void testBeginSim() {
-        int teams = 8;
-        int openBreak = 4;
-        int roundsLeft = 3;
+    public void testBeginSim() throws IOException {
         int simulationRuns = 100000;
-        int[] startingPoints = {10, 8, 6, 4, 2, 1, 0, 0};
+        int teams = readInt(), jrTeams = readInt(), openBreak = readInt(), jrBreak = readInt();
+        int roundsLeft = readInt();
+
+        int[][] startingPoints = new int[teams][2];
+
+        if (roundsLeft != 5)
+            for (int i = 0; i < teams; i++)
+                startingPoints[i][0] = readInt();
+
+        if (jrTeams != 0)
+            for (int i = 0; i < jrTeams; i++)
+                startingPoints[i][1] = readInt();
 
         // Call the beginSim method
-        BPSimulator.beginSim(teams, openBreak, roundsLeft, simulationRuns, startingPoints);
+        BPSimulator sim = new BPSimulator(teams, jrTeams, openBreak, jrBreak, roundsLeft, simulationRuns);
+        sim.beginSim(startingPoints);
 
         // Add assertions to verify the expected behavior
         // For example, you can check if the teams variable is correctly set
@@ -21,6 +31,13 @@ public class bpSimulatorTest {
         // assertEquals(openBreak, BPSimulator.openBreak);
         // assertEquals(roundsLeft, BPSimulator.roundsLeft);
         // assertEquals(simulationRuns, BPSimulator.simulationRuns);
+    }
+
+    static int readInt() throws IOException {
+        int x = 0, c;
+        while ((c = System.in.read()) != ' ' && c != '\n')
+            x = x * 10 + (c - '0');
+        return x;
     }
 }
 
