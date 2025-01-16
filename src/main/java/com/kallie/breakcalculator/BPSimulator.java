@@ -165,16 +165,16 @@ public class BPSimulator {
         // GETTING JR FRACTION
         int broke = 0, total = 0;
         int i = openBreak;
-        for (int j = 0; i < teams && j < jrBreak; i++) {
-            if (sim[i][0] == x && sim[i][1] == 1) {
+        for (int j = 0; i < Math.min(teams, openBreak + jrTeams) && j < jrBreak; i++) {
+            if (sim[i][0] == x) {
                 broke++;
                 total++;
                 j++;
             }
             if (sim[i][0] < x) break;
         }
-        for (; i < teams; i++) {
-            if (sim[i][0] == x && sim[i][1] == 1) total++;
+        for (; i < Math.min(teams, openBreak + jrTeams); i++) {
+            if (sim[i][0] == x) total++;
             if (sim[i][0] < x) break;
         }
 
