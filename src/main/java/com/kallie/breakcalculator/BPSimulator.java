@@ -3,10 +3,17 @@ package com.kallie.breakcalculator;
 import java.util.*;
 
 public class BPSimulator {
+
     int teams, jrTeams;
     int openBreak, jrBreak;
     int roundsLeft;
     int simulationRuns;
+
+    int maxOpen = 0, maxJr = 0;
+    int minOpen = Integer.MAX_VALUE, minJr = Integer.MAX_VALUE;
+    int[] minOpenFrac = new int[2], minJrFrac = new int[2];
+    int[] maxOpenFrac = new int[2], maxJrFrac = new int[2];
+    int[][] minArr = new int[teams][2], maxArr = new int[teams][2];
 	
 	static int[][] permutations = {
 		{0, 1, 2, 3}, {0, 1, 3, 2}, {0, 2, 1, 3}, {0, 2, 3, 1}, {0, 3, 1, 2}, {0, 3, 2, 1}, //0-5
@@ -29,66 +36,20 @@ public class BPSimulator {
 
         while (teams % 4 != 0) teams++; // add swings
 
-        int minOpen = Integer.MAX_VALUE, minJr = Integer.MAX_VALUE;
-        int[] minOpenFrac = new int[2], minJrFrac = new int[2];
-
-        int maxOpen = 0, maxJr = 0;
-        int[] maxOpenFrac = new int[2], maxJrFrac = new int[2];
-
-        int[][] minArr = new int[teams][2];
-        int[][] maxArr = new int[teams][2];
-
         for (int i = 0; i < simulationRuns; i++) {
             // simulate using duplicate array of startingPoints
             int[][] sim = simTourney(Arrays.stream(startingPoints).map(a -> Arrays.copyOf(a, a.length)).toArray(int[][]::new));
-            
-            // FIND BREAKING 'THRESHOLD' (lowest # points needed to break)
-            int x = sim[openBreak - 1][0];
-            int[] xJr = findXJr(sim);
-            if (xJr[0] == -1) continue;
 
-            //UPDATE OPEN
-            int[] frac = findFraction(x, sim);
-
-            double ratio = (double) frac[0] / frac[1];
-            double minRatio = (double) minOpenFrac[0] / minOpenFrac[1];
-            double maxRatio = (double) maxOpenFrac[0] / maxOpenFrac[1];
-
-            if (x < minOpen || x == minOpen && ratio > minRatio) {
-                minOpen = x; minOpenFrac = frac; //minArr = sim;
-            }
-            if (x > maxOpen || x == maxOpen && ratio < maxRatio) {
-                maxOpen = x; maxOpenFrac = frac; //maxArr = sim;
-            }
-
-            // UPDATE JR
-            double minJrRatio = (double) minJrFrac[0] / minJrFrac[1];
-            double maxJrRatio = (double) maxJrFrac[0] / maxJrFrac[1];
-            
+            //UPDATE JR
             if (roundsLeft == 5) {
-                int[] jrFracBest = findJrFraction(xJr[0], bestCaseAllocation(sim), true);
-                int[] jrFracWorst = findJrFraction(xJr[1], worstCaseAllocation(sim), false);
-
-                double jrRatioBest = (double) jrFracBest[0] / jrFracBest[1];
-                double jrRatioWorst = (double) jrFracWorst[0] / jrFracWorst[1];
-
-                if (xJr[0] < minJr || xJr[0] == minJr && jrRatioBest > minJrRatio) {
-                    minJr = xJr[0]; minJrFrac = jrFracBest; minArr = sim;
-                }
-                if (xJr[1] > maxJr || xJr[1] == maxJr && jrRatioWorst < maxJrRatio) {
-                    maxJr = xJr[1]; maxJrFrac = jrFracWorst; maxArr = sim;
-                }
+                handleBestCase(sim);
+                handleWorstCase(sim);
             } else {
-                int[] jrFrac = findJrFraction(xJr[0], sim, false);
-                double jrRatio = (double) jrFrac[0] / jrFrac[1];
-
-                if (xJr[0] < minJr || xJr[0] == minJr && jrRatio > minJrRatio) {
-                    minJr = xJr[0]; minJrFrac = jrFrac; minArr = sim;
-                }
-                if (xJr[0] > maxJr || xJr[0] == maxJr && jrRatio < maxJrRatio) {
-                    maxJr = xJr[0]; maxJrFrac = jrFrac; maxArr = sim;
-                }
+                if (!handleJr(sim)) continue;
             }
+
+            // UPDATE OPEN
+            handleOpen(sim); 
         }
 
         System.out.println(" --- OPEN BREAK ---");
@@ -97,11 +58,13 @@ public class BPSimulator {
         System.out.println("worst case: " + maxOpenFrac[0] + "/" + maxOpenFrac[1] + " teams on " + maxOpen + " break.");
         //printArr(maxArr);
 
-        System.out.println("\n --- JUNIOR BREAK ---");
-        System.out.println("best case: " + minJrFrac[0] + "/" + minJrFrac[1] + " junior teams on " + minJr + " break.");
-        printArr(minArr);
-        System.out.println("worst case: " + maxJrFrac[0] + "/" + maxJrFrac[1] + " junior teams on " + maxJr + " break.");
-        printArr(maxArr);
+        if (jrTeams > 0) {
+            System.out.println("\n --- JUNIOR BREAK ---");
+            System.out.println("best case: " + minJrFrac[0] + "/" + minJrFrac[1] + " junior teams on " + minJr + " break.");
+            printArr(minArr);
+            System.out.println("worst case: " + maxJrFrac[0] + "/" + maxJrFrac[1] + " junior teams on " + maxJr + " break.");
+            printArr(maxArr);
+        }
     }
 
     public int[][] simTourney(int[][] sim) {
@@ -119,6 +82,23 @@ public class BPSimulator {
         return sim;
     }
 
+    public void handleOpen(int[][] sim) {
+        int x = sim[openBreak - 1][0]; // x = lowest # points needed to break
+
+        int[] frac = findFraction(x, sim);
+
+        double ratio = (double) frac[0] / frac[1];
+        double minRatio = (double) minOpenFrac[0] / minOpenFrac[1];
+        double maxRatio = (double) maxOpenFrac[0] / maxOpenFrac[1];
+
+        if (x < minOpen || x == minOpen && ratio > minRatio) {
+            minOpen = x; minOpenFrac = frac; //minArr = sim;
+        }
+        if (x > maxOpen || x == maxOpen && ratio < maxRatio) {
+            maxOpen = x; maxOpenFrac = frac; //maxArr = sim;
+        }
+    }
+
     public int[] findFraction(int x, int[][] sim) {
         int total = 0; // total occurences of x
         int broke = 0; // occurences of x among teams that broke
@@ -132,7 +112,7 @@ public class BPSimulator {
             if (sim[i][0] > x) break;
         }
 
-        // count the total number of teams on
+        // count the total number of teams on x
         for (int i = openBreak; i < teams; i++) {
             if (sim[i][0] == x) total++;
             if (sim[i][0] < x) break;
@@ -141,93 +121,122 @@ public class BPSimulator {
         return new int[] {broke, total};
     }
 
-    public int[] findXJr(int[][] sim) {
-        int[] ans = {-1, -1};
+    public void handleBestCase(int[][] sim) {
+        int x = sim[teams - Math.max(jrTeams - jrBreak - openBreak, 0) - 1][0];
 
-        if (roundsLeft == 5) {
-            // ans[0] = best case; ans[1] = worst case
-            ans[0] = sim[teams - Math.max(jrTeams - jrBreak - openBreak, 0) - 1][0];
-            ans[1] = sim[openBreak + jrBreak - 1][0];
-        } else {
-            // only 1 case (no best/worst); ans in format {break, -1}
-            for (int i = openBreak, j = 0; i < teams; i++) {
-                if (sim[i][1] == 1) j++;
-
-                if (j == jrBreak) {
-                    ans[0] = sim[i][0];
-                    break;
-                }
+        // TEAM ALLOCATION
+        int j = jrTeams;
+        int openBreakingJrs = 0; // # junior teams that broke open
+        for (int i = teams - 1; i >= teams - jrBreak && j > 0; i--, j--) // fill up the last jrBreak teams
+            sim[i][1] = 1;
+        for (int i = 0; i < openBreak && j > 0; i++, j--) { // fill up the first openBreak teams
+            sim[i][1] = 1;
+            openBreakingJrs++;
+        }
+        for (int i = teams - jrBreak - 1; i > 0 && j > 0; i--, j--) // if u have any more teams, fill them from the bottom up
+            sim[i][1] = 1;
+        
+        // GETTING JR FRACTION
+        int broke = 0, total = 0;
+        for (int i = teams - jrTeams + openBreakingJrs; i < teams - jrTeams + openBreakingJrs + jrBreak; i++) {
+            if (sim[i][0] == x && sim[i][1] == 1) {
+                broke++;
+                total++;
             }
-
-            // if ans[0] is -1, then this simulation is invalid
+        }
+        for (int i = teams - jrTeams + openBreakingJrs - 1; i > openBreak; i--) {
+            if (sim[i][0] == x && sim[i][1] == 1) total++;
+            if (sim[i][0] > x || sim[i][0] == 0) break;
         }
 
-        return ans;
+        // UPDATING THE SAVED BEST CASE
+        double ratio = (double) broke / total;
+        double minJrRatio = (double) minJrFrac[0] / minJrFrac[1];
+        if (x < minJr || x == minJr && ratio > minJrRatio) {
+            minJr = x;
+            minJrFrac = new int[] {broke, total};
+            minArr = sim;
+        } 
     }
 
-    public int[] findJrFraction(int x, int[][] sim, boolean isBestCase) {
-        int total = 0; // total occurences of x
-        int broke = 0; // occurences of x among teams that broke
-        
-        // count the number of jrbreaking teams that broke on x
-        int i = 0;
-        if (isBestCase) {
-            int openBreakingJrs = 0; // # junior teams that broke open
-            for (int j = 0; j < openBreak; j++) {
-                if (sim[j][1] == 1) openBreakingJrs++;
-                else break;
-            }
+    public void handleWorstCase(int[][] sim) {
+        int x = sim[openBreak + jrBreak - 1][0];
 
-            for (i = teams - jrTeams + openBreakingJrs; i < teams - jrTeams + openBreakingJrs + jrBreak; i++) {
-                if (sim[i][0] == x && sim[i][1] == 1) {
-                    broke++;
-                    total++;
-                }
+        // GETTING JR FRACTION
+        int broke = 0, total = 0;
+        int i = openBreak;
+        for (int j = 0; i < teams && j < jrBreak; i++) {
+            if (sim[i][0] == x && sim[i][1] == 1) {
+                broke++;
+                total++;
+                j++;
             }
-        } else {
-            i = openBreak;
-            for (int j = 0; i < teams && j < jrBreak; i++) {
-                if (sim[i][0] == x && sim[i][1] == 1) {
-                    broke++;
-                    total++;
-                    j++;
-                }
-                if (sim[i][0] < x) break;
-            }
+            if (sim[i][0] < x) break;
         }
-
-        // count the total number of jr teams on x
         for (; i < teams; i++) {
             if (sim[i][0] == x && sim[i][1] == 1) total++;
             if (sim[i][0] < x) break;
         }
 
-        return new int[] {broke, total};
+        // UPDATING THE SAVED WORST CASE
+        double ratio = (double) broke / total;
+        double maxJrRatio = (double) maxJrFrac[0] / maxJrFrac[1];
+        if (x > maxJr || x == maxJr && ratio < maxJrRatio) {
+            maxJr = x;
+            maxJrFrac = new int[] {broke, total};
+            maxArr = sim;
+        }
     }
 
-    public int[][] bestCaseAllocation(int[][] sim) {
-        int j = jrTeams;
-        // first, fill up the last jrBreak teams
-        for (int i = teams - 1; i >= teams - jrBreak && j > 0; i--, j--)
-            sim[i][1] = 1;
+    public boolean handleJr(int[][] sim) {
+        // FINDING X
+        int x = -1;
+        ArrayList<Integer> jrBreaking = new ArrayList<>();
+        int i = openBreak;
+        for (int j = 0; i < teams; i++) {
+            if (sim[i][1] == 1) {
+                jrBreaking.add(sim[i][0]);
+                j++;
 
-        // then, fill up the first openBreak teams
-        for (int i = 0; i < openBreak && j > 0; i++, j--)
-            sim[i][1] = 1;
+                if (j == jrBreak) {
+                    x = sim[i][0];
+                    break;
+                }
+            }
+        }
 
-        // last, if u have any more teams, fill them from the bottom up
-        for (int i = teams - jrBreak - 1; i > 0 && j > 0; i--, j--)
-            sim[i][1] = 1;
-        
-        return sim;
-    }
+        if (x == -1) return false; // invalid case
 
-    public int[][] worstCaseAllocation(int[][] sim) {
-        // fill the first jrBreak teams after openBreak
-        for (int i = openBreak; i < openBreak + jrBreak; i++)
-            sim[i][1] = 1;
-        
-        return sim;
+        // GETTING JR FRACTION
+        int broke = 0, total = 0;
+        for (int j : jrBreaking) { // count # of jr teams that broke on x
+            if (j == x) {
+                broke++;
+                total++;
+            }
+        }
+        for (i += 1; i < teams; i++) { // count total # of jr teams on x
+            if (sim[i][0] == x && sim[i][1] == 1) total++;
+            if (sim[i][0] < x) break;
+        }
+
+        // UPDATING THE SAVED CASES
+        double ratio = (double) broke / total;
+        double minJrRatio = (double) minJrFrac[0] / minJrFrac[1];
+        double maxJrRatio = (double) maxJrFrac[0] / maxJrFrac[1];
+
+        if (x < minJr || x == minJr && ratio > minJrRatio) {
+            minJr = x;
+            minJrFrac = new int[] {broke, total};
+            minArr = sim;
+        }
+        if (x > maxJr || x == maxJr && ratio < maxJrRatio) {
+            maxJr = x;
+            maxJrFrac = new int[] {broke, total};
+            maxArr = sim;
+        }
+
+        return true;
     }
 
     public void sortDescending(int[][] arr) {
