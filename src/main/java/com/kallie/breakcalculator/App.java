@@ -22,6 +22,8 @@ public class App
             System.out.println(team.getName());
         });*/
 
+        // DO SOMETHING TO FIGURE OUT WHETHER THIS IS BP OR WSDC
+
         // BPSimulator.beginSim(calicotab.getTeams().size(), openBreak, totalRounds, simulationRuns);
     }
 }
