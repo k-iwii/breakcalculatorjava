@@ -59,9 +59,9 @@ public class BPSimulator {
         if (jrTeams > 0) {
             System.out.println("\n --- JUNIOR BREAK ---");
             System.out.println("best case: " + minJrFrac[0] + "/" + minJrFrac[1] + " junior teams on " + minJr + " break.");
-            printArr(minArr);
+            //printArr(minArr);
             System.out.println("worst case: " + maxJrFrac[0] + "/" + maxJrFrac[1] + " junior teams on " + maxJr + " break.");
-            printArr(maxArr);
+            //printArr(maxArr);
         }
     }
 
