@@ -12,20 +12,22 @@ public class bpSimulatorTest {
         int teams = 16, jrTeams = 5, openBreak = 4, jrBreak = 4;
         int roundsLeft = 5;
 
-        //int[][] startingPoints = new int[teams][2];
+        int[][] startingPoints = new int[teams][2];
         /*int[][] startingPoints = {
             {0, 0}, {3, 0}, {2, 0}, {1, 0},
             {0, 0}, {2, 0}, {3, 0}, {0, 0},
             {1, 0}, {1, 0}, {0, 0}, {2, 0},
             {3, 0}, {3, 0}, {2, 0}, {1, 0}
-        };*/
-
+        };
         int[][] startingPoints = {
             {0, 0}, {0, 0}, {0, 0}, {0, 1},
             {0, 0}, {0, 0}, {0, 1}, {0, 0}, 
             {0, 0}, {0, 1}, {0, 1}, {0, 0}, 
             {0, 0}, {0, 0}, {0, 0}, {0, 1}, 
         };
+        */
+
+        
 
         // Call the beginSim method
         BPSimulator sim = new BPSimulator(teams, jrTeams, openBreak, jrBreak, roundsLeft, simulationRuns);

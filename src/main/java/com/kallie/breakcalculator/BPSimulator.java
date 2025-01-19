@@ -34,8 +34,6 @@ public class BPSimulator {
 	public void beginSim(int[][] startingPoints) {
         sortDescending(startingPoints);
 
-        while (teams % 4 != 0) teams++; // add swings
-
         for (int i = 0; i < simulationRuns; i++) {
             // simulate using duplicate array of startingPoints
             int[][] sim = simTourney(Arrays.stream(startingPoints).map(a -> Arrays.copyOf(a, a.length)).toArray(int[][]::new));
@@ -138,11 +136,13 @@ public class BPSimulator {
         
         // GETTING JR FRACTION
         int broke = 0, total = 0;
-        for (int i = teams - jrTeams + openBreakingJrs; i < teams - jrTeams + openBreakingJrs + jrBreak; i++) {
+        for (int i = teams - jrTeams + openBreakingJrs; i < teams; i++) {
             if (sim[i][0] == x && sim[i][1] == 1) {
-                broke++;
+                if (i < teams - jrTeams + openBreakingJrs + jrBreak)
+                    broke++;
                 total++;
             }
+            if (sim[i][0] < x) break;
         }
         for (int i = teams - jrTeams + openBreakingJrs - 1; i > openBreak; i--) {
             if (sim[i][0] == x && sim[i][1] == 1) total++;

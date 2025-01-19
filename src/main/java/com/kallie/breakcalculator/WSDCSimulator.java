@@ -8,7 +8,7 @@ public class WSDCSimulator {
     int openBreak, jrBreak;
     int roundsLeft;
     int simulationRuns; // 100,000
-	
+
 	static int[][] permutations = { {0, 1}, {1, 0}};
 
     public WSDCSimulator(int teams, int jrTeams, int openBreak, int jrBreak, int roundsLeft, int simulationRuns) {
@@ -72,6 +72,23 @@ public class WSDCSimulator {
 
         return sim;
     }
+    
+    public void handleOpen(int[][] sim) {
+        int x = sim[openBreak - 1][0]; // x = lowest # points needed to break
+
+        int[] frac = findFraction(x, sim);
+
+        double ratio = (double) frac[0] / frac[1];
+        double minRatio = (double) minOpenFrac[0] / minOpenFrac[1];
+        double maxRatio = (double) maxOpenFrac[0] / maxOpenFrac[1];
+
+        if (x < minOpen || x == minOpen && ratio > minRatio) {
+            minOpen = x; minOpenFrac = frac; //minArr = sim;
+        }
+        if (x > maxOpen || x == maxOpen && ratio < maxRatio) {
+            maxOpen = x; maxOpenFrac = frac; //maxArr = sim;
+        }
+    }
 
     public int[] findFraction(int x, int[][] sim) {
         int total = 0; // total occurences of x
@@ -90,6 +107,18 @@ public class WSDCSimulator {
         }
 
         return new int[] {broke, total};
+    }
+
+    public void handleBestCase(int[][] sim) {
+
+    }
+
+    public void handleWorstCase(int[][] sim) {
+
+    }
+
+    public boolean handleJr(int[][] sim) {
+        return false;
     }
 
     public void sortDescending(int[][] arr) {

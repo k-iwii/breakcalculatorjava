@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Team {
     private int id;
-    @JsonProperty("reference")
     private String name;
     private String url;
     private int isJunior; // 1 if junior, 0 if not
@@ -26,6 +25,7 @@ public class Team {
         return name;
     }
 
+    @JsonProperty("reference")
     public void setName(String name) {
         this.name = name;
     }
@@ -58,4 +58,13 @@ public class Team {
     public void setSpeakers(Speaker[] speakers) {
         this.speakers = speakers;
     }
+
+    // Custom method to check and set name if null
+    @JsonProperty("code_name")
+    public void checkAndSetName(String codeName) {
+        if (this.name == null) {
+            this.name = codeName;
+        }
+    }
+    
 }

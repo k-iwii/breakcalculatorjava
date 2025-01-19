@@ -13,6 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Calicotab {
     private String serverUrl;
     private String tournamentSlug;
+    private List<Team> teams = new ArrayList<>();
+    private List<Team> jrTeams = new ArrayList<>();
 
     public Calicotab(String serverUrl, String tournamentSlug) {
         this.serverUrl = serverUrl;
@@ -28,8 +30,19 @@ public class Calicotab {
     }
 
     public List<Team> getTeams() {
+        if (teams.isEmpty())
+            findTeams();
+        return teams;
+    }
+
+    public List<Team> getJrTeams() {
+        if (jrTeams.isEmpty())
+            findTeams();
+        return jrTeams;
+    }
+
+    public void findTeams() {
         String urlString = serverUrl + "api/v1/tournaments/" + tournamentSlug + "/teams";
-        List<Team> teams = new ArrayList<>();
 
         try {
             URL url = new URL(urlString);
@@ -44,7 +57,7 @@ public class Calicotab {
                 Scanner scanner = new Scanner(url.openStream());
                 StringBuilder inline = new StringBuilder();
                 while (scanner.hasNext()) {
-                    inline.append(scanner.nextLine());
+                    inline.append(scanner.next());
                 }
                 scanner.close();
 
@@ -54,12 +67,12 @@ public class Calicotab {
                 Team[] teamArray = mapper.readValue(inline.toString(), Team[].class);
                 for (Team team : teamArray) {
                     teams.add(team);
+                    if (team.isJunior())
+                        jrTeams.add(team);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return teams;
     }
 }
