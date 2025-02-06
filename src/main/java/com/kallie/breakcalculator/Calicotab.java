@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Calicotab {
     private String serverUrl;
     private String tournamentSlug;
+    private int roundsPassed = -1;
     private List<Team> teams = new ArrayList<>();
     private List<Team> jrTeams = new ArrayList<>();
 
@@ -56,7 +57,8 @@ public class Calicotab {
 
         int responseCode = conn.getResponseCode();
         if (responseCode != 200) {
-            throw new RuntimeException("HttpResponseCode: " + responseCode);
+            return responseCode + "";
+            //throw new RuntimeException("HttpResponseCode: " + responseCode);
         }
         Scanner scanner = new Scanner(url.openStream());
         StringBuilder inline = new StringBuilder();
@@ -87,8 +89,11 @@ public class Calicotab {
     }
 
     public int getRoundsLeft(int totalRounds) {
-        List<Map<String, Object>> team = readStandings().get(0);
-        return totalRounds - (team.size() - 2);
+        if (roundsPassed == -1) {
+            readStandings();
+            if (roundsPassed == -1) return totalRounds;
+        }
+        return totalRounds - roundsPassed;
     }
 
     public int[][] getStandings(int[][] standings) {
@@ -102,6 +107,8 @@ public class Calicotab {
         for (List<Map<String, Object>> team : teams) {
             //System.out.println(team.get(0).get("text") + ": " + team.get(1).get("sort"));
             String teamName = team.get(0).get("text").toString();
+
+            // it might not be index 1: it could also be index 2 (ex: autumnloo tabs)
             int teamPoints = Integer.parseInt(team.get(1).get("sort").toString());
 
             standings[i][0] = teamPoints;
@@ -118,7 +125,10 @@ public class Calicotab {
         List<List<Map<String, Object>>> ans = new ArrayList<>();
 
         try {
-            Document doc = Jsoup.parse(urlToString(urlString));
+            String url = urlToString(urlString);
+            if (url == "403")
+                return new ArrayList<>();
+            Document doc = Jsoup.parse(url);
             Elements scriptElements = doc.select("script");
 
             for (Element script : scriptElements) {
@@ -136,6 +146,8 @@ public class Calicotab {
 
                 @SuppressWarnings("unchecked")
                 List<List<Map<String, Object>>> teams = (List<List<Map<String, Object>>>)map.get("data");
+                // it could also be teams.get(0).size() - 3 (ex: autumnloo tabs)
+                roundsPassed = teams.get(0).size() - 2;
                 ans = teams;
             }
         } catch (IOException e) {
