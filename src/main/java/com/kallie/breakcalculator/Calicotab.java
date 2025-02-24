@@ -89,10 +89,12 @@ public class Calicotab {
     }
 
     public int getRoundsLeft(int totalRounds) {
-        if (roundsPassed == -1) {
+        if (roundsPassed == -1)
             readStandings();
-            if (roundsPassed == -1) return totalRounds;
-        }
+
+        if (roundsPassed == -1 || roundsPassed == totalRounds)
+            return totalRounds;
+
         return totalRounds - roundsPassed;
     }
 

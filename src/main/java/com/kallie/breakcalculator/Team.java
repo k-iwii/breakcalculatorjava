@@ -6,7 +6,7 @@ public class Team {
     private int id;
     private String name;
     private String url;
-    private boolean isJunior; // 1 if junior, 0 if not
+    private boolean isJunior;
     /*@JsonProperty("break_categories")
     private String[] breakCategories;*/
     private Speaker[] speakers;
