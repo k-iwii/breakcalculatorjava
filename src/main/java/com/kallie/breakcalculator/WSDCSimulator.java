@@ -244,3 +244,5 @@ public class WSDCSimulator {
         System.out.println();
     }
 }
+
+// unfortunately wsdc doesn't work for anything with esl/efl

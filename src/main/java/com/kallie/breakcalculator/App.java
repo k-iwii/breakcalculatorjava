@@ -57,13 +57,13 @@ public class App
 }
 
 /* TEST CASES:
+
+https://edbpworldcup25.calicotab.com/edbpworldcup25/ 8 4 5 BP
+
+PASSED
 https://hhhs2025.calicotab.com/hhhs2025/participants/list/ 16 16 5 BP
 
-https://fndo24.calicotab.com/24fndo/ 4 2 5 WSDC
-
 https://hhwo24.calicotab.com/hhwo25/ 8 16 5 BP
-
-https://autumnloohst.calicotab.com/autumnloohst/ 16 8 5 BP
 
 https://qho2024.calicotab.com/qho2024/ 16 8 5 BP
 
@@ -72,6 +72,12 @@ https://bonanza24.calicotab.com/bonanza2024/tab/team/ 8 4 5 BP
 https://hhhs2024.calicotab.com/hhhs2024/ 16 8 5 BP
 
 https://qduholiday2023.calicotab.com/qho2023/break/teams/open/ 16 8 5 BP
+
+https://fndo24.calicotab.com/24fndo/ 4 2 5 WSDC
+
+
+NOT PASSED
+https://autumnloohst.calicotab.com/autumnloohst/ 16 8 5 BP
 */
 
 /*
