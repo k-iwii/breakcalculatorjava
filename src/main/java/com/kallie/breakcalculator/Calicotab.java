@@ -99,6 +99,9 @@ public class Calicotab {
     }
 
     public int[][] getStandings(int[][] standings) {
+        if (App.roundsLeft == 0 || App.roundsLeft == 5)
+            return standings;
+
         getJrTeams();
         HashSet<String> jrTeamNames = new HashSet<>();
         for (Team t : jrTeams)
@@ -111,10 +114,20 @@ public class Calicotab {
             String teamName = team.get(0).get("text").toString();
 
             // it might not be index 1: it could also be index 2 (ex: autumnloo tabs)
-            int teamPoints = Integer.parseInt(team.get(1).get("sort").toString());
+            int teamPoints = 0;
+            if (team.get(1).containsKey("sort")) {
+                teamPoints = Integer.parseInt(team.get(1).get("sort").toString());
+            } else if (team.get(2).containsKey("sort")) {
+                teamPoints = Integer.parseInt(team.get(2).get("sort").toString());
+            } else
+                System.out.println("debug");
+            //teamPoints = Integer.parseInt(team.get(1).get("sort").toString());
 
             standings[i][0] = teamPoints;
             standings[i][1] = jrTeamNames.contains(teamName) ? 1 : 0;
+            // the problem with autumnloohst is that team names saved in jrTeamNames =/= displayed team names
+            // jrTeamNames saves "reference"; displayed names are "long_name" or "short_name"
+            // ex. display names include insitution, jrTeamNames exclude institution
             i++;
         }
 

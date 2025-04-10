@@ -5,6 +5,7 @@ import java.util.Scanner;
 public class App 
 {
     static final int simulationRuns = 100000;
+    static int roundsLeft;
 
     public static void main( String[] args )
     {
@@ -25,7 +26,7 @@ public class App
 
         int teams = calicotab.getTeams().size();
         int jrTeams = calicotab.getJrTeams().size();
-        int roundsLeft = calicotab.getRoundsLeft(totalRounds);
+        roundsLeft = calicotab.getRoundsLeft(totalRounds);
         int[][] startingPoints = new int[teams][2];
 
         if (format.equals("BP")){
@@ -56,11 +57,11 @@ public class App
     }
 }
 
-/* TEST CASES:
-
-https://edbpworldcup25.calicotab.com/edbpworldcup25/ 8 4 5 BP
+/* TEST CASES: DEBUG WITH MORE ON-GOING TOURNEYS
 
 PASSED
+https://wst.calicotab.com/harvardwst2025/ 16 4 5 WSDC
+
 https://hhhs2025.calicotab.com/hhhs2025/participants/list/ 16 16 5 BP
 
 https://hhwo24.calicotab.com/hhwo25/ 8 16 5 BP
